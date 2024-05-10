@@ -14,7 +14,7 @@ makes it to structure the config in an easy way.
 
 As for what plugins I use, just look at the `lua/plugins` directory. Most 
 plugins have their own file in there, for some plugins I have a combined spec,
-for example all the completion and lsp stuff is in the `cmp.lua` file.
+for example all the completion and lsp stuff is in the `lsp.lua` file.
 
 Some honorary mentions:
 * [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) (hard to
