@@ -10,6 +10,7 @@ return {
         "hrsh7th/nvim-cmp",
         "L3MON4D3/LuaSnip",
         "folke/neodev.nvim",
+        "mfussenegger/nvim-jdtls",
     },
 
     config = function()
@@ -26,6 +27,7 @@ return {
         require("mason-lspconfig").setup({
             ensure_installed = {
                 "lua_ls",
+                "jdtls",
             },
             handlers = {
                 function(server_name)
@@ -39,13 +41,17 @@ return {
                         capabilities = capabilities,
                         settings = {
                             Lua = {
-				    runtime = { version = "Lua 5.1" },
+				    runtime = { version = "LuaJIT" },
                                 diagnostics = {
                                     globals = { "vim", "it", "describe", "before_each", "after_each" },
                                 }
                             }
                         }
                     }
+                end,
+                -- ignore jdtls here, we want that to be handled by nvim-jdtls plugin
+                ["jdtls"] = function()
+                    return true
                 end,
             },
         })
@@ -91,6 +97,8 @@ return {
                         fallback()
                     end
                 end, { "i", "s" }),
+                ["<C-k>"] = cmp.mapping.scroll_docs(-1),
+                ["<C-j>"] = cmp.mapping.scroll_docs(1),
             },
 
             sources = {
