@@ -55,6 +55,15 @@ return {
                 end,
             },
         })
+
+        -- used for copilot completions, make tab fall back to indenting if no 
+        -- character was actually typed
+        local has_words_before = function()
+          if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then return false end
+          local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+          return col ~= 0 and vim.api.nvim_buf_get_text(0, line-1, 0, line-1, col, {})[1]:match("^%s*$") == nil
+        end
+
         local luasnip = require("luasnip")
         cmp.setup({
             snippet = {
@@ -68,10 +77,12 @@ return {
                     if cmp.visible() then
                         if luasnip.expandable() then
                             luasnip.expand()
-                        else
+                        elseif cmp.get_active_entry() then
                             cmp.confirm({
                                 select = true,
                             })
+                        else
+                            fallback()
                         end
                     else
                         fallback()
@@ -79,7 +90,7 @@ return {
                 end),
 
                 ["<Tab>"] = cmp.mapping(function(fallback)
-                    if cmp.visible() then
+                    if cmp.visible() and has_words_before() then
                         cmp.select_next_item()
                     elseif luasnip.locally_jumpable(1) then
                         luasnip.jump(1)
@@ -104,8 +115,25 @@ return {
             sources = {
                 { name = "path" },
                 { name = "nvim_lsp" },
+                { name = "copilot" },
                 { name = "buffer", keyworld_length = 3 },
                 { name = "luasnip", keyword_length = 2 },
+            },
+
+            sorting = {
+                priority_weight = 2,
+                comparators = {
+                    require("copilot_cmp.comparators").prioritize,
+                    cmp.config.compare.offset,
+                    cmp.config.compare.exact,
+                    cmp.config.compare.score,
+                    cmp.config.compare.recently_used,
+                    cmp.config.compare.locality,
+                    cmp.config.compare.kind,
+                    cmp.config.compare.sort_text,
+                    cmp.config.compare.length,
+                    cmp.config.compare.order,
+                },
             },
 
             formatting = {
